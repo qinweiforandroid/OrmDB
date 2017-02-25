@@ -3,7 +3,6 @@ package com.qinwei.ormdb.sample;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.qinwei.ormdb.R;
 
 public class MainActivity extends AppCompatActivity {
 
