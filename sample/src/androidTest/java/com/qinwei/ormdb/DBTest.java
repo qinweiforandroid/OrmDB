@@ -56,7 +56,6 @@ public class DBTest {
         Company company = new Company();
         company.id = "10001";
         company.name = "美味不用等";
-        insert(company);
         long count = mDBHelper.delete(company);
         if (count > 0) {
             DBLog.d("delete success count=" + count);
@@ -80,7 +79,7 @@ public class DBTest {
 
     @Test
     public void queryById() throws Exception {
-        Company company = mDBHelper.queryById("10001");
+        Company company = mDBHelper.queryById("10001", Company.class);
         if (company != null) {
             DBLog.d("queryById:" + company.toString());
         }
@@ -88,9 +87,9 @@ public class DBTest {
 
     @Test
     public void queryAll() throws Exception {
-        ArrayList<Company> companies = mDBHelper.queryAll();
+        ArrayList<Company> companies = mDBHelper.queryAll(Company.class);
         if (companies != null) {
-            DBLog.d("queryById:" + companies.toString());
+            DBLog.d("queryAll:" + companies.toString());
         }
     }
 

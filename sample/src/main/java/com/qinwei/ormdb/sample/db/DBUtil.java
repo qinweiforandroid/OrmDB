@@ -18,4 +18,28 @@ public class DBUtil {
         String columnName = f.getAnnotation(Column.class).name();
         return TextUtils.isEmpty(columnName) ? f.getName() : columnName;
     }
+
+    public static String getColumnId(Class<?> clazz) {
+        Field[] fields = clazz.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].isAnnotationPresent(Column.class)) {
+                if (fields[i].getAnnotation(Column.class).id()) {
+                    return getColumnName(fields[i]);
+                }
+            }
+        }
+        throw new IllegalArgumentException("your class fields must have one id=true Column Annotation");
+    }
+
+    public static <T> String getIdValue(T t) throws IllegalAccessException {
+        Field[] fields = t.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].isAnnotationPresent(Column.class)) {
+                if (fields[i].getAnnotation(Column.class).id()) {
+                    return fields[i].get(t).toString();
+                }
+            }
+        }
+        throw new IllegalArgumentException("your class fields must have one id=true Column Annotation");
+    }
 }

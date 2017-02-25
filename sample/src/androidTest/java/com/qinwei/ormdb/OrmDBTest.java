@@ -80,15 +80,15 @@ public class OrmDBTest {
 
     @Test
     public void queryById() throws Exception {
-//        Skill skill = mDBHelper.queryById("10001");
-//        if (skill != null) {
-//            DBLog.d("queryById:" + skill.toString());
-//        }
+        Skill skill = mDBHelper.queryById("10001", Skill.class);
+        if (skill != null) {
+            DBLog.d("queryById:" + skill.toString());
+        }
     }
 
     @Test
     public void queryAll() throws Exception {
-        ArrayList<Skill> skills = mDBHelper.queryAll();
+        ArrayList<Skill> skills = mDBHelper.queryAll(Skill.class);
         if (skills != null) {
             DBLog.d("queryById:" + skills.toString());
         }
