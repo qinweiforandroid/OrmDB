@@ -1,16 +1,22 @@
 package com.qinwei.ormdb.sample.domain;
 
+import com.qinwei.ormdb.sample.db.Column;
+import com.qinwei.ormdb.sample.db.Table;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by qinwei on 2017/2/25.
  */
+@Table(name = "dt_company")
 public class Company implements Serializable {
     public static final String TABLE_COMPANY = "dt_company";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
+    @Column(name = "_id", id = true)
     public String id;
+    @Column
     public String name;
     public ArrayList<Developer> developers;
 

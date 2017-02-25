@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.qinwei.ormdb.sample.domain.Company;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 /**
@@ -30,11 +31,40 @@ public class DBHelper extends SQLiteOpenHelper {
         return getWritableDatabase();
     }
 
-    public long newOrUpdate(Company company) {
-        ContentValues values = new ContentValues();
-        values.put(Company.COLUMN_ID, company.id);
-        values.put(Company.COLUMN_NAME, company.name);
-        return getDB().replace(Company.TABLE_COMPANY, null, values);
+    /**
+     * 新增或者修改表记录
+     *
+     * @param t   obj will insert or update to db
+     * @param <T>
+     * @return >0代表执行成功 -1代码执行失败
+     */
+    public <T> long newOrUpdate(T t) {
+        try {
+            if (t.getClass().isAnnotationPresent(Table.class)) {
+                ContentValues values = new ContentValues();
+                Field[] fields = t.getClass().getDeclaredFields();
+                for (int i = 0; i < fields.length; i++) {
+                    Field f = fields[i];
+                    f.setAccessible(true);
+                    if (f.isAnnotationPresent(Column.class)) {
+                        String columnName = DBUtil.getColumnName(f);
+                        if (f.getType() == String.class) {
+                            values.put(columnName, f.get(t).toString());
+                        } else if (f.getType() == int.class || f.getType() == Integer.class) {
+                            values.put(columnName, f.getInt(t));
+                        } else {
+                            // FIXME: 2017/2/25 other type
+                        }
+                    }
+                }
+                return getDB().replace(DBUtil.getTableName(t.getClass()), null, values);
+            } else {
+                throw new IllegalArgumentException("your class must be has  Table Annotation");
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public long delete(Company company) {
