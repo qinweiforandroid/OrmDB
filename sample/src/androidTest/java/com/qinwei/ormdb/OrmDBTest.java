@@ -57,19 +57,19 @@ public class OrmDBTest {
         Skill skill = new Skill();
         skill.id = "10001";
         skill.language = "美味不用等";
-//        long count = mDBHelper.delete(skill);
-//        if (count > 0) {
-//            DBLog.d("delete success count=" + count);
-//        } else {
-//            DBLog.d("insert failure！count=" + count);
-//        }
+        long count = mDBHelper.delete(skill);
+        if (count > 0) {
+            DBLog.d("delete success count=" + count);
+        } else {
+            DBLog.d("insert failure！count=" + count);
+        }
     }
 
     @Test
     public void update() throws Exception {
         Skill Skill = new Skill();
         Skill.id = "10001";
-        Skill.language = "首坦金融";
+        Skill.language = "ios";
         long count = mDBHelper.newOrUpdate(Skill);
         if (count > 0) {
             DBLog.d("update success count=" + count);

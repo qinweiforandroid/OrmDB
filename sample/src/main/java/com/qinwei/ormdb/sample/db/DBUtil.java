@@ -1,5 +1,6 @@
 package com.qinwei.ormdb.sample.db;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import java.lang.reflect.Field;
@@ -28,7 +29,7 @@ public class DBUtil {
                 }
             }
         }
-        throw new IllegalArgumentException("your class fields must have one id=true Column Annotation");
+        throw new IllegalArgumentException("your class[" + clazz.getSimpleName() + "] fields must have one id=true Column Annotation");
     }
 
     public static <T> String getIdValue(T t) throws IllegalAccessException {
@@ -40,6 +41,79 @@ public class DBUtil {
                 }
             }
         }
-        throw new IllegalArgumentException("your class fields must have one id=true Column Annotation");
+        throw new IllegalArgumentException("your class[" + t.getClass().getSimpleName() + "] fields must have one id=true Column Annotation");
+    }
+
+    public static void createTable(SQLiteDatabase database, Class<?> clazz) {
+        DBLog.d("createTable: class name " + clazz.getSimpleName());
+        if (clazz.isAnnotationPresent(Table.class)) {
+            StringBuilder sql = new StringBuilder();
+            String tableName = getTableName(clazz);
+            sql.append("create table if not exists " + tableName + "( ");
+            Field[] fields = clazz.getDeclaredFields();
+            Field field = null;
+            for (int i = 0; i < fields.length; i++) {
+                field = fields[i];
+                field.setAccessible(true);
+                if (field.isAnnotationPresent(Column.class)) {
+                    String columnName = field.getAnnotation(Column.class).name();
+                    if (TextUtils.isEmpty(columnName)) {
+                        columnName = field.getName();
+                    }
+                    if (field.getAnnotation(Column.class).id()) {
+                        sql.append(columnName + " TEXT PRIMARY KEY");
+                    } else {
+                        Class<?> type = field.getType();
+                        if (type == String.class && isUseFieldTypeDefault(field)) {
+                            sql.append(columnName + " TEXT ");
+                        } else if (type == int.class || type == Integer.class) {
+                            sql.append(columnName + " INTEGER ");
+                        } else {
+                            // FIXME: 2017/2/25 other impl
+                        }
+                    }
+                    sql.append(",");
+                }
+            }
+            sql.delete((sql.length() - 1), sql.length());
+            sql.append(")");
+//            String createTableSql = "create table if not exists  " + tableName + "(" + School.COLUMN_ID + " text PRIMARY KEY, " +
+//                    School.COLUMN_NAME + " varchar" + " )";
+            database.execSQL(sql.toString());
+        } else {
+            throw new IllegalArgumentException("you class[" + clazz.getSimpleName() + "] must add Table annotation ");
+        }
+    }
+
+    private static boolean isUseFieldTypeDefault(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.DEFAULT;
+    }
+
+    private static boolean isUseFieldTypeVarchar(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.VARCHAR;
+    }
+
+    private static boolean isUseFieldTypeText(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.TEXT;
+    }
+
+    private static boolean isUseFieldTypeInteger(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.INTEGER;
+    }
+
+    private static boolean isUseFieldTypeSerializable(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.SERIALIZABLE;
+    }
+
+    private static boolean isUseFieldTypeTone(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.TONE;
+    }
+
+    private static boolean isUseFieldTypeTmany(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.TMANY;
+    }
+
+    private static boolean isUseFieldTypeBlob(Field field) {
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.BLOB;
     }
 }

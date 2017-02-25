@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.qinwei.ormdb.sample.domain.Company;
+import com.qinwei.ormdb.sample.domain.Developer;
+import com.qinwei.ormdb.sample.domain.Skill;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -60,7 +62,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
                 return getDB().replace(DBUtil.getTableName(t.getClass()), null, values);
             } else {
-                throw new IllegalArgumentException("your class must add Table Annotation");
+                throw new RuntimeException("you class[" + t.getClass().getSimpleName() + "] must add Table annotation ");
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -68,12 +70,19 @@ public class DBHelper extends SQLiteOpenHelper {
         return -1;
     }
 
+    /**
+     * 删除一个对象
+     *
+     * @param t
+     * @param <T>
+     * @return
+     */
     public <T> long delete(T t) {
         try {
             if (t.getClass().isAnnotationPresent(Table.class)) {
                 return getDB().delete(DBUtil.getTableName(t.getClass()), DBUtil.getColumnId(t.getClass()) + "=?", new String[]{DBUtil.getIdValue(t)});
             } else {
-                throw new IllegalArgumentException("your class must add Table Annotation");
+                throw new RuntimeException("you class[" + t.getClass().getSimpleName() + "] must add Table annotation ");
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -81,6 +90,14 @@ public class DBHelper extends SQLiteOpenHelper {
         return -1;
     }
 
+    /**
+     * 根据id查询并转化为obj
+     *
+     * @param id
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public <T> T queryById(String id, Class<T> clazz) {
         try {
             T t = null;
@@ -111,7 +128,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
                 return t;
             } else {
-                throw new IllegalArgumentException("your class must add Table Annotation");
+                throw new RuntimeException("you class[" + clazz.getSimpleName() + "] must add Table annotation ");
             }
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -121,6 +138,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return null;
     }
 
+    /**
+     * 查询所有
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public <T> ArrayList<T> queryAll(Class<T> clazz) {
         ArrayList<T> ts = new ArrayList<>();
         try {
@@ -152,7 +176,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     cursor.close();
                 }
             } else {
-                throw new IllegalArgumentException("your class must add Table Annotation");
+                throw new RuntimeException("you class[" + clazz.getSimpleName() + "] must add Table annotation ");
             }
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -164,12 +188,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql_company = "create table dt_company (_id varchar primary key,name varchar);";
-        String sql_developer = "create table dt_developer (_id varchar primary key,name varchar,age integer,company_id varchar);";
-        String sql_skill = "create table dt_skill (_id varchar primary key,language varchar);";
-        db.execSQL(sql_company);
-        db.execSQL(sql_developer);
-        db.execSQL(sql_skill);
+        DBUtil.createTable(db, Company.class);
+        DBUtil.createTable(db, Developer.class);
+        DBUtil.createTable(db, Skill.class);
     }
 
     @Override
