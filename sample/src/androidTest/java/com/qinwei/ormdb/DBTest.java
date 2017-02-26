@@ -6,6 +6,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.qinwei.ormdb.sample.db.DBHelper;
 import com.qinwei.ormdb.sample.db.DBLog;
+import com.qinwei.ormdb.sample.db.DBManager;
 import com.qinwei.ormdb.sample.domain.Company;
 
 import org.junit.After;
@@ -21,13 +22,11 @@ import java.util.ArrayList;
 @RunWith(AndroidJUnit4.class)
 public class DBTest {
     private Context appContext;
-    private DBHelper mDBHelper;
 
     @Before
     public void setUp() throws Exception {
         appContext = InstrumentationRegistry.getTargetContext();
-        mDBHelper = new DBHelper(appContext);
-        mDBHelper.getDB();
+        DBManager.getInstance(appContext);
     }
 
     @Test
@@ -35,20 +34,11 @@ public class DBTest {
         Company company = new Company();
         company.id = "10001";
         company.name = "美味不用等";
-        insert(company);
+        DBManager.getInstance(appContext).newOrUpdate(company);
 
         company.id = "10002";
         company.name = "城家酒店";
-        insert(company);
-    }
-
-    public void insert(Company company) {
-        long count = mDBHelper.newOrUpdate(company);
-        if (count > 0) {
-            DBLog.d("insert success！count=" + count + " data:" + company.toString());
-        } else {
-            DBLog.d("insert failure！count=" + count);
-        }
+        DBManager.getInstance(appContext).newOrUpdate(company);
     }
 
     @Test
@@ -56,12 +46,7 @@ public class DBTest {
         Company company = new Company();
         company.id = "10001";
         company.name = "美味不用等";
-        long count = mDBHelper.delete(company);
-        if (count > 0) {
-            DBLog.d("delete success count=" + count);
-        } else {
-            DBLog.d("insert failure！count=" + count);
-        }
+        DBManager.getInstance(appContext).delete(company);
     }
 
     @Test
@@ -69,28 +54,19 @@ public class DBTest {
         Company company = new Company();
         company.id = "10001";
         company.name = "首坦金融";
-        long count = mDBHelper.newOrUpdate(company);
-        if (count > 0) {
-            DBLog.d("update success count=" + count);
-        } else {
-            DBLog.d("update failure！count=" + count);
-        }
+        DBManager.getInstance(appContext).newOrUpdate(company);
     }
 
     @Test
     public void queryById() throws Exception {
-        Company company = mDBHelper.queryById("10001", Company.class);
-        if (company != null) {
-            DBLog.d("queryById:" + company.toString());
-        }
+        Company company = DBManager.getInstance(appContext).queryById("10001", Company.class);
+        DBLog.d("queryById:" + company.toString());
     }
 
     @Test
     public void queryAll() throws Exception {
-        ArrayList<Company> companies = mDBHelper.queryAll(Company.class);
-        if (companies != null) {
-            DBLog.d("queryAll:" + companies.toString());
-        }
+        ArrayList<Company> companies = DBManager.getInstance(appContext).queryAll(Company.class);
+        DBLog.d("queryAll:" + companies.toString());
     }
 
     @Test

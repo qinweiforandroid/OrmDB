@@ -45,7 +45,7 @@ public class DBUtil {
     }
 
     public static void createTable(SQLiteDatabase database, Class<?> clazz) {
-        DBLog.d("createTable: class name " + clazz.getSimpleName());
+        DBLog.d("createTable class name " + clazz.getSimpleName());
         if (clazz.isAnnotationPresent(Table.class)) {
             StringBuilder sql = new StringBuilder();
             String tableName = getTableName(clazz);
@@ -56,15 +56,12 @@ public class DBUtil {
                 field = fields[i];
                 field.setAccessible(true);
                 if (field.isAnnotationPresent(Column.class)) {
-                    String columnName = field.getAnnotation(Column.class).name();
-                    if (TextUtils.isEmpty(columnName)) {
-                        columnName = field.getName();
-                    }
+                    String columnName = getColumnName(field);
                     if (field.getAnnotation(Column.class).id()) {
                         sql.append(columnName + " TEXT PRIMARY KEY");
                     } else {
                         Class<?> type = field.getType();
-                        if (type == String.class && isUseFieldTypeDefault(field)) {
+                        if (type == String.class) {
                             sql.append(columnName + " TEXT ");
                         } else if (type == int.class || type == Integer.class) {
                             sql.append(columnName + " INTEGER ");
@@ -77,8 +74,7 @@ public class DBUtil {
             }
             sql.delete((sql.length() - 1), sql.length());
             sql.append(")");
-//            String createTableSql = "create table if not exists  " + tableName + "(" + School.COLUMN_ID + " text PRIMARY KEY, " +
-//                    School.COLUMN_NAME + " varchar" + " )";
+            DBLog.d("createTable sql=" + sql.toString());
             database.execSQL(sql.toString());
         } else {
             throw new IllegalArgumentException("you class[" + clazz.getSimpleName() + "] must add Table annotation ");
