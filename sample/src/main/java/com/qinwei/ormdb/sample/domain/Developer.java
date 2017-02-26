@@ -17,7 +17,9 @@ public class Developer implements Serializable {
     public String name;
     @Column
     public int age;
+    @Column
     public Company company;
+    @Column(type = Column.ColumnType.SERIALIZABLE)
     public ArrayList<Skill> skills;
 
 
@@ -28,6 +30,7 @@ public class Developer implements Serializable {
                 ", name='" + name + '\'' +
                 ", age=" + age +
                 ", company=" + company +
+                ", skills=" + skills +
                 '}';
     }
 

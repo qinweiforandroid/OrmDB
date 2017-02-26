@@ -51,7 +51,15 @@ public class DBManager {
                         } else if (f.getType() == int.class || f.getType() == Integer.class) {
                             values.put(columnName, f.getInt(t));
                         } else {
-                            // FIXME: 2017/2/25 other type
+                            Column.ColumnType columnType = f.getAnnotation(Column.class).type();
+//                            if (columnType == Column.ColumnType.UNKNOWN) {
+//                                throw new IllegalArgumentException("you must add columnType for special object");
+//                            }
+                            if (columnType == Column.ColumnType.SERIALIZABLE) {
+                                values.put(columnName, SerializableUtil.toByteArray(f.get(t)));
+                            } else {
+                                // FIXME: 2017/2/25 other type
+                            }
                         }
                     }
                 }
@@ -113,7 +121,20 @@ public class DBManager {
                             } else if (type == int.class || type == Integer.class) {
                                 f.set(t, cursor.getInt(cursor.getColumnIndex(DBUtil.getColumnName(f))));
                             } else {
-                                // FIXME: 2017/2/25 other type init
+                                Column.ColumnType columnType = f.getAnnotation(Column.class).type();
+                                if (columnType == Column.ColumnType.UNKNOWN) {
+                                    throw new IllegalArgumentException("you must add columnType for special object");
+                                }
+                                if (columnType == Column.ColumnType.SERIALIZABLE) {
+                                    byte[] bytes = cursor.getBlob(cursor.getColumnIndex(DBUtil.getColumnName(f)));
+                                    if (bytes != null) {
+                                        f.set(t, SerializableUtil.toObject(bytes));
+                                    } else {
+                                        f.set(t, null);
+                                    }
+                                } else {
+                                    // FIXME: 2017/2/25 other type
+                                }
                             }
                         }
                     }
@@ -161,7 +182,20 @@ public class DBManager {
                             } else if (type == int.class || type == Integer.class) {
                                 f.set(t, cursor.getInt(cursor.getColumnIndex(DBUtil.getColumnName(f))));
                             } else {
-                                // FIXME: 2017/2/25 other type init
+                                Column.ColumnType columnType = f.getAnnotation(Column.class).type();
+                                if (columnType == Column.ColumnType.UNKNOWN) {
+                                    throw new IllegalArgumentException("you must add columnType for special object");
+                                }
+                                if (columnType == Column.ColumnType.SERIALIZABLE) {
+                                    byte[] bytes = cursor.getBlob(cursor.getColumnIndex(DBUtil.getColumnName(f)));
+                                    if (bytes != null) {
+                                        f.set(t, SerializableUtil.toObject(bytes));
+                                    } else {
+                                        f.set(t, null);
+                                    }
+                                } else {
+                                    // FIXME: 2017/2/25 other type
+                                }
                             }
                         }
                     }

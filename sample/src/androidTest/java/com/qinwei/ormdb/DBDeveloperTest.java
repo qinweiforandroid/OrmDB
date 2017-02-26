@@ -6,8 +6,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.qinwei.ormdb.sample.db.DBLog;
 import com.qinwei.ormdb.sample.db.DBManager;
-import com.qinwei.ormdb.sample.domain.Company;
 import com.qinwei.ormdb.sample.domain.Developer;
+import com.qinwei.ormdb.sample.domain.Skill;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * Created by qinwei on 2017/2/25.
  */
 @RunWith(AndroidJUnit4.class)
-public class DBTest {
+public class DBDeveloperTest {
     private Context appContext;
 
     @Before
@@ -31,41 +31,44 @@ public class DBTest {
 
     @Test
     public void insert() throws Exception {
-        Company company = new Company();
-        company.id = "10001";
-        company.name = "美味不用等";
-        DBManager.getInstance(appContext).newOrUpdate(company);
-
-        company.id = "10002";
-        company.name = "城家酒店";
-        DBManager.getInstance(appContext).newOrUpdate(company);
+        Developer developer = new Developer();
+        developer.id = "10001";
+        developer.name = "刘午敬";
+        ArrayList<Skill> skills = new ArrayList<>();
+        Skill skill = new Skill();
+        skill.name = "coding";
+        skill.desc = "android";
+        skills.add(skill);
+        developer.skills = skills;
+        DBManager.getInstance(appContext).newOrUpdate(developer);
+        queryById();
     }
 
     @Test
     public void delete() throws Exception {
-        Company company = new Company();
-        company.id = "10001";
-        DBManager.getInstance(appContext).delete(company);
+        Developer developer = new Developer();
+        developer.id = "10001";
+        DBManager.getInstance(appContext).delete(developer);
     }
 
     @Test
     public void update() throws Exception {
-        Company company = new Company();
-        company.id = "10001";
-        company.name = "首坦金融";
-        DBManager.getInstance(appContext).newOrUpdate(company);
+        Developer developer = new Developer();
+        developer.id = "10001";
+        developer.name = "首坦金融";
+        DBManager.getInstance(appContext).newOrUpdate(developer);
     }
 
     @Test
     public void queryById() throws Exception {
-        Company company = DBManager.getInstance(appContext).queryById("10001", Company.class);
-        DBLog.d("queryById:" + company.toString());
+        Developer developer = DBManager.getInstance(appContext).queryById("10001", Developer.class);
+        DBLog.d("queryById:" + developer.toString());
     }
 
     @Test
     public void queryAll() throws Exception {
-        ArrayList<Company> companies = DBManager.getInstance(appContext).queryAll(Company.class);
-        DBLog.d("queryAll:" + companies.toString());
+        ArrayList<Developer> developers = DBManager.getInstance(appContext).queryAll(Developer.class);
+        DBLog.d("queryAll:" + developers.toString());
     }
 
     @Test

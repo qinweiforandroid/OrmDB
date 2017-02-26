@@ -9,12 +9,11 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
     enum ColumnType {
-        DEFAULT,
+        UNKNOWN,
         VARCHAR,
         TEXT,
         BLOB,
         INTEGER,
-        DOUBLE,
         SERIALIZABLE,
         TONE,
         TMANY
@@ -24,6 +23,6 @@ public @interface Column {
 
     boolean id() default false;
 
-    ColumnType type() default ColumnType.DEFAULT;
+    ColumnType type() default ColumnType.UNKNOWN;
 
 }

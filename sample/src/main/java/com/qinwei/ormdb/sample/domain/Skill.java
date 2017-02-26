@@ -13,7 +13,18 @@ public class Skill implements Serializable {
     @Column(name = "_id", id = true)
     public String id;
     @Column
-    public String language;
+    public String name;
+    @Column
+    public String desc;
+
+    @Override
+    public String toString() {
+        return "Skill{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", desc='" + desc + '\'' +
+                '}';
+    }
 
     public String getId() {
         return id;
@@ -23,20 +34,19 @@ public class Skill implements Serializable {
         this.id = id;
     }
 
-    public String getLanguage() {
-        return language;
+    public String getDesc() {
+        return desc;
     }
 
-    @Override
-    public String toString() {
-        return "Skill{" +
-                "id='" + id + '\'' +
-                ", language='" + language + '\'' +
-                '}';
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
-    public void setLanguage(String language) {
+    public String getName() {
+        return name;
+    }
 
-        this.language = language;
+    public void setName(String name) {
+        this.name = name;
     }
 }

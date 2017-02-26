@@ -67,6 +67,13 @@ public class DBUtil {
                             sql.append(columnName + " INTEGER ");
                         } else {
                             // FIXME: 2017/2/25 other impl
+                            Column.ColumnType columnType = field.getAnnotation(Column.class).type();
+                            if (columnType == Column.ColumnType.UNKNOWN) {
+                                throw new IllegalArgumentException("you must add columnType for special object");
+                            }
+                            if (columnType == Column.ColumnType.SERIALIZABLE) {
+                                sql.append(columnName + " BLOB ");
+                            }
                         }
                     }
                     sql.append(",");
@@ -82,7 +89,7 @@ public class DBUtil {
     }
 
     private static boolean isUseFieldTypeDefault(Field field) {
-        return field.getAnnotation(Column.class).type() == Column.ColumnType.DEFAULT;
+        return field.getAnnotation(Column.class).type() == Column.ColumnType.UNKNOWN;
     }
 
     private static boolean isUseFieldTypeVarchar(Field field) {

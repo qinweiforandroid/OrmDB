@@ -16,7 +16,7 @@ public class Company implements Serializable {
     public static final String COLUMN_NAME = "name";
     @Column(name = "_id", id = true)
     public String id;
-    @Column(type = Column.ColumnType.VARCHAR)
+    @Column(type = Column.ColumnType.TEXT)
     public String name;
     public ArrayList<Developer> developers;
 
