@@ -1,7 +1,8 @@
 package com.qinwei.ormdb.sample.domain;
 
-import com.qinwei.ormdb.sample.db.Column;
-import com.qinwei.ormdb.sample.db.Table;
+
+import com.qinwei.ormdb.core.Column;
+import com.qinwei.ormdb.core.Table;
 
 import java.io.Serializable;
 

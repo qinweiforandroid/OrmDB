@@ -1,4 +1,4 @@
-package com.qinwei.ormdb.sample.db;
+package com.qinwei.ormdb.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

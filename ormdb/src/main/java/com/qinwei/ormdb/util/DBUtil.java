@@ -1,7 +1,11 @@
-package com.qinwei.ormdb.sample.db;
+package com.qinwei.ormdb.util;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+
+import com.qinwei.ormdb.log.DBLog;
+import com.qinwei.ormdb.core.Column;
+import com.qinwei.ormdb.core.Table;
 
 import java.lang.reflect.Field;
 
@@ -98,10 +102,12 @@ public class DBUtil {
                 if (type == Column.ColumnType.UNKNOWN) {
                     throw new IllegalArgumentException("you must add columnType for special object");
                 }
-                if (type == Column.ColumnType.TONE) {
-                    columnType = "TEXT";
-                } else if (type == Column.ColumnType.SERIALIZABLE) {
+                if (type == Column.ColumnType.SERIALIZABLE) {
                     columnType = "BLOB";
+                } else if (type == Column.ColumnType.TONE) {
+                    columnType = "TEXT";
+                } else {
+
                 }
             }
         }

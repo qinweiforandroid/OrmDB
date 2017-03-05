@@ -1,4 +1,4 @@
-package com.qinwei.ormdb.sample.db;
+package com.qinwei.ormdb.log;
 
 import android.util.Log;
 

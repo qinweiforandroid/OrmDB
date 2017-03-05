@@ -4,10 +4,10 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.qinwei.ormdb.sample.db.DBLog;
+import com.qinwei.ormdb.log.DBLog;
+import com.qinwei.ormdb.sample.dao.DTOCompanyController;
 import com.qinwei.ormdb.sample.db.DBManager;
 import com.qinwei.ormdb.sample.domain.Company;
-import com.qinwei.ormdb.sample.domain.Developer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +26,7 @@ public class DBTest {
     @Before
     public void setUp() throws Exception {
         appContext = InstrumentationRegistry.getTargetContext();
-        DBManager.getInstance(appContext);
+        DBManager.getInstance().init(appContext);
     }
 
     @Test
@@ -34,18 +34,19 @@ public class DBTest {
         Company company = new Company();
         company.id = "10001";
         company.name = "美味不用等";
-        DBManager.getInstance(appContext).newOrUpdate(company);
+        DBManager.getInstance().getDao(Company.class).newOrUpdate(company);
 
         company.id = "10002";
         company.name = "城家酒店";
-        DBManager.getInstance(appContext).newOrUpdate(company);
+        DTOCompanyController.getDao().newOrUpdate(company);
+        queryAll();
     }
 
     @Test
     public void delete() throws Exception {
         Company company = new Company();
         company.id = "10001";
-        DBManager.getInstance(appContext).delete(company);
+        DTOCompanyController.getDao().delete(company);
     }
 
     @Test
@@ -53,18 +54,18 @@ public class DBTest {
         Company company = new Company();
         company.id = "10001";
         company.name = "首坦金融";
-        DBManager.getInstance(appContext).newOrUpdate(company);
+        DTOCompanyController.getDao().newOrUpdate(company);
     }
 
     @Test
     public void queryById() throws Exception {
-        Company company = DBManager.getInstance(appContext).queryById("10001", Company.class);
+        Company company = DTOCompanyController.getDao().queryById("10001");
         DBLog.d("queryById:" + company.toString());
     }
 
     @Test
     public void queryAll() throws Exception {
-        ArrayList<Company> companies = DBManager.getInstance(appContext).queryAll(Company.class);
+        ArrayList<Company> companies = DTOCompanyController.getDao().queryAll();
         DBLog.d("queryAll:" + companies.toString());
     }
 

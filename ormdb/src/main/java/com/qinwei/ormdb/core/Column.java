@@ -1,4 +1,4 @@
-package com.qinwei.ormdb.sample.db;
+package com.qinwei.ormdb.core;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

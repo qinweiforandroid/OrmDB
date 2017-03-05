@@ -21,7 +21,7 @@ import java.util.ArrayList;
  * Created by qinwei on 2017/2/25.
  */
 @RunWith(AndroidJUnit4.class)
-public class DBDeveloperTest {
+public class DBDeveloperTest1 {
     private Context appContext;
 
     @Before
@@ -47,6 +47,7 @@ public class DBDeveloperTest {
         skill.desc = "android";
         skills.add(skill);
         developer.skills = skills;//存技能信息
+
         DBManager.getInstance().getDao(Developer.class).newOrUpdate(developer);
         queryById();
     }
@@ -64,7 +65,6 @@ public class DBDeveloperTest {
         developer.id = "10001";
         developer.name = "张三";
         DBManager.getInstance().getDao(Developer.class).newOrUpdate(developer);
-        queryById();
     }
 
     @Test
