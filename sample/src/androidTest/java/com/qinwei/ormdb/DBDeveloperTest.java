@@ -6,6 +6,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.qinwei.ormdb.sample.db.DBLog;
 import com.qinwei.ormdb.sample.db.DBManager;
+import com.qinwei.ormdb.sample.domain.Company;
 import com.qinwei.ormdb.sample.domain.Developer;
 import com.qinwei.ormdb.sample.domain.Skill;
 
@@ -34,12 +35,18 @@ public class DBDeveloperTest {
         Developer developer = new Developer();
         developer.id = "10001";
         developer.name = "刘午敬";
+
+        Company company = new Company();
+        company.id = "10001";
+        company.name = "美味不用等";
+        developer.company = company;//存公司信息
+
         ArrayList<Skill> skills = new ArrayList<>();
         Skill skill = new Skill();
         skill.name = "coding";
         skill.desc = "android";
         skills.add(skill);
-        developer.skills = skills;
+        developer.skills = skills;//存技能信息
         DBManager.getInstance(appContext).newOrUpdate(developer);
         queryById();
     }
@@ -55,7 +62,7 @@ public class DBDeveloperTest {
     public void update() throws Exception {
         Developer developer = new Developer();
         developer.id = "10001";
-        developer.name = "首坦金融";
+        developer.name = "张三";
         DBManager.getInstance(appContext).newOrUpdate(developer);
     }
 

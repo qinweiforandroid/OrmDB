@@ -20,7 +20,7 @@ public class DBUtil {
         return TextUtils.isEmpty(columnName) ? f.getName() : columnName;
     }
 
-    public static String getColumnId(Class<?> clazz) {
+    public static String getIdColumnName(Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             if (fields[i].isAnnotationPresent(Column.class)) {
@@ -30,6 +30,19 @@ public class DBUtil {
             }
         }
         throw new IllegalArgumentException("your class[" + clazz.getSimpleName() + "] fields must have one id=true Column Annotation");
+    }
+
+    public static String getIdFieldName(Class<?> clazz) {
+        Field[] fields = clazz.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].isAnnotationPresent(Column.class)) {
+                if (fields[i].getAnnotation(Column.class).id()) {
+                    return fields[i].getName();
+                }
+            }
+        }
+        throw new IllegalArgumentException("your class[" + clazz.getSimpleName() + "] fields must have one id=true Column Annotation");
+
     }
 
     public static <T> String getIdValue(T t) throws IllegalAccessException {
@@ -45,7 +58,7 @@ public class DBUtil {
     }
 
     public static void createTable(SQLiteDatabase database, Class<?> clazz) {
-        DBLog.d("createTable class name " + clazz.getSimpleName());
+        DBLog.d("create table class name " + clazz.getSimpleName());
         if (clazz.isAnnotationPresent(Table.class)) {
             StringBuilder sql = new StringBuilder();
             String tableName = getTableName(clazz);
@@ -56,36 +69,43 @@ public class DBUtil {
                 field = fields[i];
                 field.setAccessible(true);
                 if (field.isAnnotationPresent(Column.class)) {
-                    String columnName = getColumnName(field);
-                    if (field.getAnnotation(Column.class).id()) {
-                        sql.append(columnName + " TEXT PRIMARY KEY");
-                    } else {
-                        Class<?> type = field.getType();
-                        if (type == String.class) {
-                            sql.append(columnName + " TEXT ");
-                        } else if (type == int.class || type == Integer.class) {
-                            sql.append(columnName + " INTEGER ");
-                        } else {
-                            // FIXME: 2017/2/25 other impl
-                            Column.ColumnType columnType = field.getAnnotation(Column.class).type();
-                            if (columnType == Column.ColumnType.UNKNOWN) {
-                                throw new IllegalArgumentException("you must add columnType for special object");
-                            }
-                            if (columnType == Column.ColumnType.SERIALIZABLE) {
-                                sql.append(columnName + " BLOB ");
-                            }
-                        }
-                    }
-                    sql.append(",");
+                    sql.append(getOneCreateTableStmt(field));
                 }
             }
             sql.delete((sql.length() - 1), sql.length());
             sql.append(")");
-            DBLog.d("createTable sql=" + sql.toString());
+            DBLog.d("create table sql:" + sql.toString());
             database.execSQL(sql.toString());
         } else {
             throw new IllegalArgumentException("you class[" + clazz.getSimpleName() + "] must add Table annotation ");
         }
+    }
+
+    public static String getOneCreateTableStmt(Field field) {
+        String columnName = getColumnName(field);
+        String columnType = "";
+        if (field.getAnnotation(Column.class).id()) {
+            columnType = "TEXT PRIMARY KEY";
+        } else {
+            Class<?> clazz = field.getType();
+            if (clazz == String.class) {
+                columnType = "TEXT";
+            } else if (clazz == int.class || clazz == Integer.class) {
+                columnType = "INTEGER";
+            } else {
+                // FIXME: 2017/2/25 other impl
+                Column.ColumnType type = field.getAnnotation(Column.class).type();
+                if (type == Column.ColumnType.UNKNOWN) {
+                    throw new IllegalArgumentException("you must add columnType for special object");
+                }
+                if (type == Column.ColumnType.TONE) {
+                    columnType = "TEXT";
+                } else if (type == Column.ColumnType.SERIALIZABLE) {
+                    columnType = "BLOB";
+                }
+            }
+        }
+        return columnName + " " + columnType + ",";
     }
 
     private static boolean isUseFieldTypeDefault(Field field) {
@@ -119,4 +139,6 @@ public class DBUtil {
     private static boolean isUseFieldTypeBlob(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.BLOB;
     }
+
+
 }

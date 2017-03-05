@@ -17,7 +17,7 @@ public class Developer implements Serializable {
     public String name;
     @Column
     public int age;
-    @Column
+    @Column(type = Column.ColumnType.TONE, autorefresh = true)
     public Company company;
     @Column(type = Column.ColumnType.SERIALIZABLE)
     public ArrayList<Skill> skills;

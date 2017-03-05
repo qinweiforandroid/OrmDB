@@ -25,4 +25,6 @@ public @interface Column {
 
     ColumnType type() default ColumnType.UNKNOWN;
 
+    boolean autorefresh() default false;
+
 }

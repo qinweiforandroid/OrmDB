@@ -51,11 +51,27 @@ public class DBManager {
                         } else if (f.getType() == int.class || f.getType() == Integer.class) {
                             values.put(columnName, f.getInt(t));
                         } else {
-                            Column.ColumnType columnType = f.getAnnotation(Column.class).type();
-//                            if (columnType == Column.ColumnType.UNKNOWN) {
-//                                throw new IllegalArgumentException("you must add columnType for special object");
-//                            }
-                            if (columnType == Column.ColumnType.SERIALIZABLE) {
+                            Column column = f.getAnnotation(Column.class);
+                            Column.ColumnType columnType = column.type();
+                            if (columnType == Column.ColumnType.UNKNOWN) {
+                                throw new IllegalArgumentException("you must add columnType for special object");
+                            }
+                            //一对一关系处理
+                            if (columnType == Column.ColumnType.TONE) {
+                                Object tone = f.get(t);
+                                if (tone.getClass().isAnnotationPresent(Table.class)) {
+                                    String idName = DBUtil.getIdColumnName(tone.getClass());
+                                    if (column.autorefresh()) {
+                                        long result = newOrUpdate(tone);
+                                        DBLog.d("newOrUpdate autoRefresh class [" + tone.getClass().getSimpleName() + "] result count=" + result);
+                                    } else {
+                                        String idValue = DBUtil.getIdValue(tone);
+                                        values.put(idName, idValue);
+                                    }
+                                } else {
+                                    throw new IllegalArgumentException("the special object [" + tone.getClass().getSimpleName() + "] must add Table Annotation");
+                                }
+                            } else if (columnType == Column.ColumnType.SERIALIZABLE) {
                                 values.put(columnName, SerializableUtil.toByteArray(f.get(t)));
                             } else {
                                 // FIXME: 2017/2/25 other type
@@ -65,7 +81,7 @@ public class DBManager {
                 }
                 return mDBHelper.getDB().replace(DBUtil.getTableName(t.getClass()), null, values);
             } else {
-                throw new RuntimeException("you class[" + t.getClass().getSimpleName() + "] must add Table annotation ");
+                throw new IllegalAccessException("you class[" + t.getClass().getSimpleName() + "] must add Table annotation ");
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -83,7 +99,7 @@ public class DBManager {
     public <T> long delete(T t) {
         try {
             if (t.getClass().isAnnotationPresent(Table.class)) {
-                return mDBHelper.getDB().delete(DBUtil.getTableName(t.getClass()), DBUtil.getColumnId(t.getClass()) + "=?", new String[]{DBUtil.getIdValue(t)});
+                return mDBHelper.getDB().delete(DBUtil.getTableName(t.getClass()), DBUtil.getIdColumnName(t.getClass()) + "=?", new String[]{DBUtil.getIdValue(t)});
             } else {
                 throw new RuntimeException("you class[" + t.getClass().getSimpleName() + "] must add Table annotation ");
             }
@@ -105,7 +121,7 @@ public class DBManager {
         try {
             T t = null;
             if (clazz.isAnnotationPresent(Table.class)) {
-                String sql = "select * from " + DBUtil.getTableName(clazz) + " where " + DBUtil.getColumnId(clazz) + "=?";
+                String sql = "select * from " + DBUtil.getTableName(clazz) + " where " + DBUtil.getIdColumnName(clazz) + "=?";
                 Cursor cursor = mDBHelper.getDB().rawQuery(sql, new String[]{id});
                 Field f = null;
                 while (cursor.moveToNext()) {
@@ -121,7 +137,8 @@ public class DBManager {
                             } else if (type == int.class || type == Integer.class) {
                                 f.set(t, cursor.getInt(cursor.getColumnIndex(DBUtil.getColumnName(f))));
                             } else {
-                                Column.ColumnType columnType = f.getAnnotation(Column.class).type();
+                                Column column = f.getAnnotation(Column.class);
+                                Column.ColumnType columnType = column.type();
                                 if (columnType == Column.ColumnType.UNKNOWN) {
                                     throw new IllegalArgumentException("you must add columnType for special object");
                                 }
@@ -131,6 +148,26 @@ public class DBManager {
                                         f.set(t, SerializableUtil.toObject(bytes));
                                     } else {
                                         f.set(t, null);
+                                    }
+                                } else if (columnType == Column.ColumnType.TONE) {
+                                    if (f.getType().isAnnotationPresent(Table.class)) {
+                                        Object tone = null;
+                                        String idName = DBUtil.getIdColumnName(f.getType());
+                                        String idValue = cursor.getString(cursor.getColumnIndex(idName));
+                                        if (column.autorefresh()) {//根据外键查询出并转换为object
+                                            tone = queryById(idValue, f.getType());
+                                            DBLog.d("query autoRefresh relate class[" + f.getType().getSimpleName() + "] id[" + idValue + "] info:" + tone);
+                                        } else {
+                                            //只存外键id
+                                            tone = f.getType().newInstance();
+                                            //tone id对应的变量名称
+                                            String idFieldName = DBUtil.getIdFieldName(tone.getClass());
+                                            Field idField = tone.getClass().getDeclaredField(idFieldName);
+                                            idField.set(tone, idValue);
+                                        }
+                                        f.set(t, tone);
+                                    } else {
+                                        throw new IllegalArgumentException("the special object [" + f.getType().getSimpleName() + "] must add Table Annotation");
                                     }
                                 } else {
                                     // FIXME: 2017/2/25 other type
@@ -149,6 +186,8 @@ public class DBManager {
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
         return null;
@@ -182,7 +221,8 @@ public class DBManager {
                             } else if (type == int.class || type == Integer.class) {
                                 f.set(t, cursor.getInt(cursor.getColumnIndex(DBUtil.getColumnName(f))));
                             } else {
-                                Column.ColumnType columnType = f.getAnnotation(Column.class).type();
+                                Column column = f.getAnnotation(Column.class);
+                                Column.ColumnType columnType = column.type();
                                 if (columnType == Column.ColumnType.UNKNOWN) {
                                     throw new IllegalArgumentException("you must add columnType for special object");
                                 }
@@ -192,6 +232,26 @@ public class DBManager {
                                         f.set(t, SerializableUtil.toObject(bytes));
                                     } else {
                                         f.set(t, null);
+                                    }
+                                } else if (columnType == Column.ColumnType.TONE) {
+                                    if (f.getType().isAnnotationPresent(Table.class)) {
+                                        Object tone = null;
+                                        String idName = DBUtil.getIdColumnName(f.getType());
+                                        String idValue = cursor.getString(cursor.getColumnIndex(idName));
+                                        if (column.autorefresh()) {//根据外键查询出并转换为object
+                                            tone = queryById(idValue, f.getType());
+                                            DBLog.d("query autoRefresh relate class[" + f.getType().getSimpleName() + "] id[" + idValue + "] info:" + tone);
+                                        } else {
+                                            //只存外键id
+                                            tone = f.getType().newInstance();
+                                            //tone id对应的变量名称
+                                            String idFieldName = DBUtil.getIdFieldName(tone.getClass());
+                                            Field idField = tone.getClass().getDeclaredField(idFieldName);
+                                            idField.set(tone, idValue);
+                                        }
+                                        f.set(t, tone);
+                                    } else {
+                                        throw new IllegalArgumentException("the special object [" + f.getType().getSimpleName() + "] must add Table Annotation");
                                     }
                                 } else {
                                     // FIXME: 2017/2/25 other type
@@ -210,6 +270,8 @@ public class DBManager {
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
         return ts;
