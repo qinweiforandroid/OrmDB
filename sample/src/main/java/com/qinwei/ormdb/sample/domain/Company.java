@@ -12,9 +12,6 @@ import java.util.ArrayList;
  */
 @Table(name = "dt_company")
 public class Company implements Serializable {
-    public static final String TABLE_COMPANY = "dt_company";
-    public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_NAME = "name";
     @Column(name = "_id", id = true)
     public String id;
     @Column(type = Column.ColumnType.TEXT)

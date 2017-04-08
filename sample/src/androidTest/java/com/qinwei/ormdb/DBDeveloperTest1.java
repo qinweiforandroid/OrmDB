@@ -33,11 +33,11 @@ public class DBDeveloperTest1 {
     @Test
     public void insert() throws Exception {
         Developer developer = new Developer();
-        developer.id = "10001";
+        developer.id = "y10001";
         developer.name = "刘午敬";
 
         Company company = new Company();
-        company.id = "10001";
+        company.id = "g10001";
         company.name = "美味不用等";
         developer.company = company;//存公司信息
 
@@ -69,7 +69,7 @@ public class DBDeveloperTest1 {
 
     @Test
     public void queryById() throws Exception {
-        Developer developer = DBManager.getInstance().getDao(Developer.class).queryById("10001");
+        Developer developer = DBManager.getInstance().getDao(Developer.class).queryById("y10001");
         DBLog.d("queryById:" + developer.toString());
     }
 

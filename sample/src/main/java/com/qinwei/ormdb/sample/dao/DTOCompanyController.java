@@ -16,4 +16,8 @@ public class DTOCompanyController {
     public static long newOrUpdate(Company company) {
         return getDao().newOrUpdate(company);
     }
+
+    public static long delete(String id) {
+        return getDao().delete(id);
+    }
 }

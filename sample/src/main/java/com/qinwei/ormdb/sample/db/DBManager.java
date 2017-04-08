@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.qinwei.ormdb.BaseDao;
-import com.qinwei.ormdb.cache.DaoCacheManager;
+import com.qinwei.ormdb.cache.CacheManager;
 import com.qinwei.ormdb.sample.dao.CompanyDao;
 import com.qinwei.ormdb.sample.dao.DeveloperDao;
 import com.qinwei.ormdb.sample.domain.Company;
@@ -35,13 +35,12 @@ public class DBManager {
     public void init(Context mContext) {
         this.mContext = mContext.getApplicationContext();
         mDBHelper = new DBHelper(this.mContext);
-        DaoCacheManager.getInstance();
-        DaoCacheManager.getInstance().putDao(Company.class, new CompanyDao(mDBHelper.getDB(), Company.class));
-        DaoCacheManager.getInstance().putDao(Developer.class, new DeveloperDao(mDBHelper.getDB(), Developer.class));
+        CacheManager.getInstance().putDao(Company.class, new CompanyDao(mDBHelper.getDB(), Company.class));
+        CacheManager.getInstance().putDao(Developer.class, new DeveloperDao(mDBHelper.getDB(), Developer.class));
     }
 
     public <T> BaseDao<T> getDao(Class<T> clazz) {
-        return (BaseDao<T>) DaoCacheManager.getInstance().getDao(clazz);
+        return (BaseDao<T>) CacheManager.getInstance().getDao(clazz);
     }
 
     public class DBHelper extends SQLiteOpenHelper {
@@ -77,7 +76,7 @@ public class DBManager {
     }
 
     public void release() {
-        DaoCacheManager.getInstance().clear();
+        CacheManager.getInstance().clear();
         mContext = null;
         mDBHelper = null;
         mInstance = null;

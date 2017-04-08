@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.qinwei.ormdb.cache.DaoCacheManager;
+import com.qinwei.ormdb.cache.CacheManager;
 import com.qinwei.ormdb.core.Column;
 import com.qinwei.ormdb.core.Table;
 import com.qinwei.ormdb.log.DBLog;
@@ -23,9 +23,9 @@ public class BaseDao<T> {
     private SQLiteDatabase mDatabase;//数据库
     private Class<T> mClazz;//dto object的class
     private Field[] mFields;//obj对应所有变量
-    private String mIdName;//数据表id的名称
-    private String mIdFieldName;//obj对应id变量名称
-    private String mDataTableName;//obj对应的表名称
+    public String mIdName;//数据表id的名称
+    public String mIdFieldName;//obj对应id变量名称
+    public String mDataTableName;//obj对应的表名称
 
     public BaseDao(SQLiteDatabase db, Class<T> clz) {
         mDatabase = db;
@@ -45,6 +45,10 @@ public class BaseDao<T> {
 
     public void endTransaction() {
         mDatabase.endTransaction();
+    }
+
+    public <T> long newOrUpdate(ContentValues values) {
+        return mDatabase.replace(mDataTableName, null, values);
     }
 
     public <T> long newOrUpdate(T t) {
@@ -72,12 +76,13 @@ public class BaseDao<T> {
                                 continue;
                             }
                             if (tone.getClass().isAnnotationPresent(Table.class)) {
+                                String idValue = DBUtil.getIdValue(tone);
                                 if (column.autorefresh()) {
-                                    long result = DaoCacheManager.getInstance().getDao(tone.getClass()).newOrUpdate(tone);
+                                    long result = CacheManager.getInstance().getDao(tone.getClass()).newOrUpdate(tone);
+                                    values.put(columnName, idValue);
                                     DBLog.d("newOrUpdate autoRefresh class [" + tone.getClass().getSimpleName() + "] result count=" + result);
                                 } else {
-                                    String idValue = DBUtil.getIdValue(tone);
-                                    values.put(mIdName, idValue);
+                                    values.put(columnName, idValue);
                                 }
                             } else {
                                 throw new IllegalArgumentException("the special object [" + tone.getClass().getSimpleName() + "] must add Table Annotation");
@@ -90,7 +95,7 @@ public class BaseDao<T> {
                     }
                 }
             }
-            return mDatabase.replace(mDataTableName, null, values);
+            return newOrUpdate(values);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -100,8 +105,8 @@ public class BaseDao<T> {
     public T queryById(String id) {
         try {
             T t = null;
-            String sql = "select * from " + mDataTableName + " where " + DBUtil.getIdColumnName(mClazz) + "=?";
-            Cursor cursor = mDatabase.rawQuery(sql, new String[]{id});
+            String sql = "select * from " + mDataTableName + " where " + mIdName + "=?";
+            Cursor cursor = rawQuery(sql, new String[]{id});
             Field f = null;
             while (cursor.moveToNext()) {
                 t = mClazz.newInstance();
@@ -110,10 +115,11 @@ public class BaseDao<T> {
                     f.setAccessible(true);
                     if (f.isAnnotationPresent(Column.class)) {
                         Type type = f.getType();
+                        String columnName = DBUtil.getColumnName(f);
                         if (type == String.class) {
-                            f.set(t, cursor.getString(cursor.getColumnIndex(DBUtil.getColumnName(f))));
+                            f.set(t, cursor.getString(cursor.getColumnIndex(columnName)));
                         } else if (type == int.class || type == Integer.class) {
-                            f.set(t, cursor.getInt(cursor.getColumnIndex(DBUtil.getColumnName(f))));
+                            f.set(t, cursor.getInt(cursor.getColumnIndex(columnName)));
                         } else {
                             Column column = f.getAnnotation(Column.class);
                             Column.ColumnType columnType = column.type();
@@ -121,7 +127,7 @@ public class BaseDao<T> {
                                 throw new IllegalArgumentException("you must add columnType for special object");
                             }
                             if (columnType == Column.ColumnType.SERIALIZABLE) {
-                                byte[] bytes = cursor.getBlob(cursor.getColumnIndex(DBUtil.getColumnName(f)));
+                                byte[] bytes = cursor.getBlob(cursor.getColumnIndex(columnName));
                                 if (bytes != null) {
                                     f.set(t, SerializableUtil.toObject(bytes));
                                 } else {
@@ -130,19 +136,16 @@ public class BaseDao<T> {
                             } else if (columnType == Column.ColumnType.TONE) {
                                 if (f.getType().isAnnotationPresent(Table.class)) {
                                     Object tone = null;
-                                    String idName = DBUtil.getIdColumnName(f.getType());
-                                    String idValue = cursor.getString(cursor.getColumnIndex(idName));
                                     if (column.autorefresh()) {//根据外键查询出并转换为object
-//                                            tone = queryById(idValue, f.getType());
-                                        tone = DaoCacheManager.getInstance().getDao(f.getType()).queryById(idValue);
+                                        String idValue = cursor.getString(cursor.getColumnIndex(columnName));
+                                        tone = CacheManager.getInstance().getDao(f.getType()).queryById(idValue);
                                         DBLog.d("query autoRefresh relate class[" + f.getType().getSimpleName() + "] id[" + idValue + "] info:" + tone);
                                     } else {
                                         //只存外键id
                                         tone = f.getType().newInstance();
                                         //tone id对应的变量名称
-                                        String idFieldName = DBUtil.getIdFieldName(tone.getClass());
-                                        Field idField = tone.getClass().getDeclaredField(idFieldName);
-                                        idField.set(tone, idValue);
+                                        Field idField = tone.getClass().getDeclaredField(CacheManager.getInstance().getDao(tone.getClass()).mIdFieldName);
+                                        idField.set(tone, cursor.getString(cursor.getColumnIndex(columnName)));
                                     }
                                     f.set(t, tone);
                                 } else {
@@ -178,7 +181,7 @@ public class BaseDao<T> {
         ArrayList<T> ts = new ArrayList<>();
         try {
             String sql = "select * from " + mDataTableName;
-            Cursor cursor = mDatabase.rawQuery(sql, null);
+            Cursor cursor = rawQuery(sql, null);
             T t = null;
             Field f = null;
             while (cursor.moveToNext()) {
@@ -189,10 +192,11 @@ public class BaseDao<T> {
                     f.setAccessible(true);
                     if (f.isAnnotationPresent(Column.class)) {
                         Type type = f.getType();
+                        String columnName = DBUtil.getColumnName(f);
                         if (type == String.class) {
-                            f.set(t, cursor.getString(cursor.getColumnIndex(DBUtil.getColumnName(f))));
+                            f.set(t, cursor.getString(cursor.getColumnIndex(columnName)));
                         } else if (type == int.class || type == Integer.class) {
-                            f.set(t, cursor.getInt(cursor.getColumnIndex(DBUtil.getColumnName(f))));
+                            f.set(t, cursor.getInt(cursor.getColumnIndex(columnName)));
                         } else {
                             Column column = f.getAnnotation(Column.class);
                             Column.ColumnType columnType = column.type();
@@ -200,7 +204,7 @@ public class BaseDao<T> {
                                 throw new IllegalArgumentException("you must add columnType for special object");
                             }
                             if (columnType == Column.ColumnType.SERIALIZABLE) {
-                                byte[] bytes = cursor.getBlob(cursor.getColumnIndex(DBUtil.getColumnName(f)));
+                                byte[] bytes = cursor.getBlob(cursor.getColumnIndex(columnName));
                                 if (bytes != null) {
                                     f.set(t, SerializableUtil.toObject(bytes));
                                 } else {
@@ -209,18 +213,16 @@ public class BaseDao<T> {
                             } else if (columnType == Column.ColumnType.TONE) {
                                 if (f.getType().isAnnotationPresent(Table.class)) {
                                     Object tone = null;
-                                    String idName = DBUtil.getIdColumnName(f.getType());
-                                    String idValue = cursor.getString(cursor.getColumnIndex(idName));
+                                    String idValue = cursor.getString(cursor.getColumnIndex(columnName));
                                     if (column.autorefresh()) {//根据外键查询出并转换为object
 //                                            tone = queryById(idValue, f.getType());
-                                        tone = DaoCacheManager.getInstance().getDao(f.getType()).queryById(idValue);
+                                        tone = CacheManager.getInstance().getDao(f.getType()).queryById(idValue);
                                         DBLog.d("query autoRefresh relate class[" + f.getType().getSimpleName() + "] id[" + idValue + "] info:" + tone);
                                     } else {
                                         //只存外键id
                                         tone = f.getType().newInstance();
                                         //tone id对应的变量名称
-                                        String idFieldName = DBUtil.getIdFieldName(tone.getClass());
-                                        Field idField = tone.getClass().getDeclaredField(idFieldName);
+                                        Field idField = tone.getClass().getDeclaredField(CacheManager.getInstance().getDao(tone.getClass()).mIdFieldName);
                                         idField.set(tone, idValue);
                                     }
                                     f.set(t, tone);
@@ -248,6 +250,11 @@ public class BaseDao<T> {
         return ts;
     }
 
+    public Cursor rawQuery(String sql, String[] selectionArgs) {
+        DBLog.d("rawQuery sql:" + sql);
+        return mDatabase.rawQuery(sql, selectionArgs);
+    }
+
     /**
      * 删除一个对象
      *
@@ -255,10 +262,18 @@ public class BaseDao<T> {
      */
     public long delete(T t) {
         try {
-            return mDatabase.delete(mDataTableName, mIdName + "=?", new String[]{DBUtil.getIdValue(t)});
+            return delete(mIdName + "=?", new String[]{DBUtil.getIdValue(t)});
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public long delete(String id) {
+        return delete(mIdName + "=?", new String[]{id});
+    }
+
+    public long delete(String where, String[] whereArgs) {
+        return mDatabase.delete(mDataTableName, where, whereArgs);
     }
 }

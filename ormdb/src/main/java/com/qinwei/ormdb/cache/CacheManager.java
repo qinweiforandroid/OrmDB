@@ -8,17 +8,17 @@ import java.util.HashMap;
  * Created by qinwei on 2017/3/6.
  */
 
-public class DaoCacheManager {
-    private static DaoCacheManager mInstance;
+public class CacheManager {
+    private static CacheManager mInstance;
     private HashMap<String, BaseDao> daoCache;
 
-    private DaoCacheManager() {
+    private CacheManager() {
         daoCache = new HashMap<>();
     }
 
-    public static DaoCacheManager getInstance() {
+    public static CacheManager getInstance() {
         if (mInstance == null) {
-            mInstance = new DaoCacheManager();
+            mInstance = new CacheManager();
         }
         return mInstance;
     }
