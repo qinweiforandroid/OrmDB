@@ -5,6 +5,7 @@ import com.qinwei.ormdb.core.Column;
 import com.qinwei.ormdb.core.Table;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -22,7 +23,8 @@ public class Developer implements Serializable {
     public Company company;
     @Column(type = Column.ColumnType.SERIALIZABLE)
     public ArrayList<Skill> skills;
-
+    @Column(type= Column.ColumnType.BIGDECIMAL)
+    public BigDecimal price;
 
     @Override
     public String toString() {
@@ -32,6 +34,7 @@ public class Developer implements Serializable {
                 ", age=" + age +
                 ", company=" + company +
                 ", skills=" + skills +
+                ", price=" + price +
                 '}';
     }
 
@@ -73,5 +76,13 @@ public class Developer implements Serializable {
 
     public void setSkills(ArrayList<Skill> skills) {
         this.skills = skills;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 }

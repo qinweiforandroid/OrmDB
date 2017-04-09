@@ -14,10 +14,12 @@ public @interface Column {
         TEXT,
         BLOB,
         INTEGER,
+        BIGDECIMAL,
         SERIALIZABLE,
         TONE,
         TMANY
     }
+
 
     String name() default "";
 

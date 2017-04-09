@@ -102,12 +102,24 @@ public class DBUtil {
                 if (type == Column.ColumnType.UNKNOWN) {
                     throw new IllegalArgumentException("you must add columnType for special object");
                 }
-                if (type == Column.ColumnType.SERIALIZABLE) {
-                    columnType = "BLOB";
-                } else if (type == Column.ColumnType.TONE) {
-                    columnType = "TEXT";
-                } else {
-
+                switch (type) {
+                    case SERIALIZABLE:
+                        columnType = "BLOB";
+                        break;
+                    case TONE:
+                        columnType = "TEXT";
+                        break;
+                    case INTEGER:
+                        columnType = "INTEGER";
+                        break;
+                    case VARCHAR:
+                        columnType = "VARCHAR";
+                        break;
+                    case BIGDECIMAL:
+                        columnType = "BIGDECIMAL";
+                        break;
+                    default:
+                        break;
                 }
             }
         }

@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -35,6 +36,7 @@ public class DBDeveloperTest {
         Developer developer = new Developer();
         developer.id = "10001";
         developer.name = "刘午敬";
+        developer.price = new BigDecimal(20000.01);
 
         Company company = new Company();
         company.id = "10001";
