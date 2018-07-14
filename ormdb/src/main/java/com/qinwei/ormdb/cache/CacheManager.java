@@ -27,8 +27,8 @@ public class CacheManager {
         daoCache.put(dtoClass.getSimpleName(), baseDao);
     }
 
-    public BaseDao<?> getDao(Class dtoClass) {
-        return daoCache.get(dtoClass.getSimpleName());
+    public <T> BaseDao<T> getDao(Class<T> dtoClass) {
+        return (BaseDao<T>) daoCache.get(dtoClass.getSimpleName());
     }
 
     public void clear() {

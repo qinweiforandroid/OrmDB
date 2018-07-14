@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         minSdkVersion 15
@@ -19,7 +19,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
+def libName = "qdb"
+def version = "_V1.0"
+def sdkDestinationPath = "build"
+def zipFile = file('build/intermediates/bundles/default/classes.jar')
+task deleteBuild(type: Delete) {
+    delete sdkDestinationPath + libName + version + ".jar"
+}
+task makeJar(type: Jar) {
+    from zipTree(zipFile)
+    from fileTree(dir: 'src/main')
+    baseName = libName + version
+    destinationDir = file(sdkDestinationPath)
+}
+makeJar.dependsOn(deleteBuild, build)
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

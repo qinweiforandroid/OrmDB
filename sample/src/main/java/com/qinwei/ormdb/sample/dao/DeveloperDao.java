@@ -10,7 +10,7 @@ import com.qinwei.ormdb.sample.domain.Developer;
  */
 
 public class DeveloperDao extends BaseDao<Developer> {
-    public DeveloperDao(SQLiteDatabase db, Class<Developer> clz) {
-        super(db, clz);
+    public DeveloperDao(SQLiteDatabase db) {
+        super(db);
     }
 }

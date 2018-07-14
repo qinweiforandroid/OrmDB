@@ -126,35 +126,35 @@ public class DBUtil {
         return columnName + " " + columnType + ",";
     }
 
-    private static boolean isUseFieldTypeDefault(Field field) {
+    public static boolean isUseFieldTypeDefault(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.UNKNOWN;
     }
 
-    private static boolean isUseFieldTypeVarchar(Field field) {
+    public static boolean isUseFieldTypeVarchar(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.VARCHAR;
     }
 
-    private static boolean isUseFieldTypeText(Field field) {
+    public static boolean isUseFieldTypeText(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.TEXT;
     }
 
-    private static boolean isUseFieldTypeInteger(Field field) {
+    public static boolean isUseFieldTypeInteger(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.INTEGER;
     }
 
-    private static boolean isUseFieldTypeSerializable(Field field) {
+    public static boolean isUseFieldTypeSerializable(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.SERIALIZABLE;
     }
 
-    private static boolean isUseFieldTypeTone(Field field) {
+    public static boolean isUseFieldTypeTone(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.TONE;
     }
 
-    private static boolean isUseFieldTypeTmany(Field field) {
+    public static boolean isUseFieldTypeTmany(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.TMANY;
     }
 
-    private static boolean isUseFieldTypeBlob(Field field) {
+    public static boolean isUseFieldTypeBlob(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.BLOB;
     }
 

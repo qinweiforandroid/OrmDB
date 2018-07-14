@@ -12,6 +12,7 @@ import com.qinwei.ormdb.util.DBUtil;
 import com.qinwei.ormdb.util.SerializableUtil;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,15 +29,16 @@ public class BaseDao<T> {
     public String mIdFieldName;//obj对应id变量名称
     public String mDataTableName;//obj对应的表名称
 
-    public BaseDao(SQLiteDatabase db, Class<T> clz) {
+    public BaseDao(SQLiteDatabase db) {
+        mClazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         mDatabase = db;
-        mClazz = clz;
-        mFields = clz.getDeclaredFields();
-        mIdName = DBUtil.getIdColumnName(clz);
-        mIdFieldName = DBUtil.getIdFieldName(clz);
-        mDataTableName = DBUtil.getTableName(clz);
+        mFields = mClazz.getDeclaredFields();
+        mIdName = DBUtil.getIdColumnName(mClazz);
+        mIdFieldName = DBUtil.getIdFieldName(mClazz);
+        mDataTableName = DBUtil.getTableName(mClazz);
+
         if (!mClazz.isAnnotationPresent(Table.class)) {
-            throw new RuntimeException("you class[" + clz.getSimpleName() + "] must add Table annotation ");
+            throw new RuntimeException("you class[" + mClazz.getSimpleName() + "] must add Table annotation ");
         }
     }
 

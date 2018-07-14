@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 
 public class CompanyDao extends BaseDao<Company> {
-    public CompanyDao(SQLiteDatabase db, Class<Company> clz) {
-        super(db, clz);
+    public CompanyDao(SQLiteDatabase db) {
+        super(db);
     }
 
     public ArrayList<Company> queryCustom() {
