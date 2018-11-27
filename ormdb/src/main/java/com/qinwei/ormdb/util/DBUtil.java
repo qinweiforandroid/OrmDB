@@ -33,6 +33,9 @@ public class DBUtil {
                 }
             }
         }
+        if (clazz.getSuperclass() != null && !clazz.getSuperclass().getName().equals(Object.class.getName())) {
+            return getIdColumnName(clazz.getSuperclass());
+        }
         throw new IllegalArgumentException("your class[" + clazz.getSimpleName() + "] fields must have one id=true Column Annotation");
     }
 
@@ -45,18 +48,28 @@ public class DBUtil {
                 }
             }
         }
+        if (clazz.getSuperclass() != null && !clazz.getSuperclass().getName().equals(Object.class.getName())) {
+            return getIdColumnName(clazz.getSuperclass());
+        }
         throw new IllegalArgumentException("your class[" + clazz.getSimpleName() + "] fields must have one id=true Column Annotation");
 
     }
 
     public static <T> String getIdValue(T t) throws IllegalAccessException {
-        Field[] fields = t.getClass().getDeclaredFields();
+        return getIdValue(t, t.getClass());
+    }
+
+    public static <T> String getIdValue(T t, Class<?> clazz) throws IllegalAccessException {
+        Field[] fields = clazz.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             if (fields[i].isAnnotationPresent(Column.class)) {
                 if (fields[i].getAnnotation(Column.class).id()) {
                     return fields[i].get(t).toString();
                 }
             }
+        }
+        if (clazz.getSuperclass() != null && !clazz.getSuperclass().getName().equals(Object.class.getName())) {
+            return getIdValue(t, clazz.getSuperclass());
         }
         throw new IllegalArgumentException("your class[" + t.getClass().getSimpleName() + "] fields must have one id=true Column Annotation");
     }

@@ -106,7 +106,7 @@ public class BaseDao<T> {
             } else if (columnType == Column.ColumnType.INTEGER) {
                 values.put(columnName, f.getInt(t));
             } else if (columnType == Column.ColumnType.BIGDECIMAL && f.get(t) != null) {
-                values.put(columnName, f.get(t).toString());
+                values.put(columnName, ((BigDecimal) f.get(t)).toPlainString());
             } else if (columnType == Column.ColumnType.VARCHAR) {
                 values.put(columnName, f.get(t).toString());
             } else {
