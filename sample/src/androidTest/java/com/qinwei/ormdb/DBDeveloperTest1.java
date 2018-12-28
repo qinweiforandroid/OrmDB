@@ -5,7 +5,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.qinwei.ormdb.log.DBLog;
-import com.qinwei.ormdb.sample.db.DBManager;
+import com.qinwei.ormdb.sample.db.DBHelper;
 import com.qinwei.ormdb.sample.domain.Company;
 import com.qinwei.ormdb.sample.domain.Developer;
 import com.qinwei.ormdb.sample.domain.Skill;
@@ -27,7 +27,7 @@ public class DBDeveloperTest1 {
     @Before
     public void setUp() throws Exception {
         appContext = InstrumentationRegistry.getTargetContext();
-        DBManager.getInstance().init(appContext);
+        DBManager.init(appContext, new DBHelper(appContext));
     }
 
     @Test

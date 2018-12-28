@@ -3,9 +3,9 @@ package com.qinwei.ormdb.util;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
-import com.qinwei.ormdb.log.DBLog;
 import com.qinwei.ormdb.core.Column;
 import com.qinwei.ormdb.core.Table;
+import com.qinwei.ormdb.log.DBLog;
 
 import java.lang.reflect.Field;
 
@@ -138,6 +138,8 @@ public class DBUtil {
         }
         return columnName + " " + columnType + ",";
     }
+
+    
 
     public static boolean isUseFieldTypeDefault(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.UNKNOWN;

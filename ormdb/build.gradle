@@ -21,20 +21,21 @@ android {
     }
 
 }
-def libName = "qdb"
-def version = "_V1.0"
-def sdkDestinationPath = "build"
-def zipFile = file('build/intermediates/bundles/default/classes.jar')
-task deleteBuild(type: Delete) {
-    delete sdkDestinationPath + libName + version + ".jar"
+task makeJar(type: Copy) {
+    //删除存在的
+    delete 'build/libs/db.jar'
+    //设置拷贝的文件
+    from('build/intermediates/bundles/debug/')
+    //打进jar包后的文件目录
+    into('build/')
+    //将classes.jar放入build/libs/目录下
+    //include ,exclude参数来设置过滤
+    //（我们只关心classes.jar这个文件）
+    include('classes.jar')
+    //重命名
+    rename('classes.jar', 'db.jar')
 }
-task makeJar(type: Jar) {
-    from zipTree(zipFile)
-    from fileTree(dir: 'src/main')
-    baseName = libName + version
-    destinationDir = file(sdkDestinationPath)
-}
-makeJar.dependsOn(deleteBuild, build)
+makeJar.dependsOn(build)
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
