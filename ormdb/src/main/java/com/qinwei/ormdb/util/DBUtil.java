@@ -20,7 +20,11 @@ public class DBUtil {
     }
 
     public static String getColumnName(Field f) {
-        String columnName = f.getAnnotation(Column.class).name();
+        return getColumnName(f, f.getAnnotation(Column.class));
+    }
+
+    public static String getColumnName(Field f, Column column) {
+        String columnName = column.name();
         return TextUtils.isEmpty(columnName) ? f.getName() : columnName;
     }
 
@@ -56,20 +60,22 @@ public class DBUtil {
     }
 
     public static <T> String getIdValue(T t) throws IllegalAccessException {
-        return getIdValue(t, t.getClass());
+        return getIdValue(t, t.getClass(), getIdFieldName(t.getClass()));
     }
 
-    public static <T> String getIdValue(T t, Class<?> clazz) throws IllegalAccessException {
+    public static <T> String getIdValue(T t, String mIdFieldName) throws IllegalAccessException {
+        return getIdValue(t, t.getClass(), mIdFieldName);
+    }
+
+    public static <T> String getIdValue(T t, Class<?> clazz, String mIdFieldName) throws IllegalAccessException {
         Field[] fields = clazz.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
-            if (fields[i].isAnnotationPresent(Column.class)) {
-                if (fields[i].getAnnotation(Column.class).id()) {
-                    return fields[i].get(t).toString();
-                }
+            if (TextUtils.equals(fields[i].getName(), mIdFieldName)) {
+                return fields[i].get(t).toString();
             }
         }
         if (clazz.getSuperclass() != null && !clazz.getSuperclass().getName().equals(Object.class.getName())) {
-            return getIdValue(t, clazz.getSuperclass());
+            return getIdValue(t, clazz.getSuperclass(), getIdFieldName(clazz.getSuperclass()));
         }
         throw new IllegalArgumentException("your class[" + t.getClass().getSimpleName() + "] fields must have one id=true Column Annotation");
     }
@@ -139,7 +145,6 @@ public class DBUtil {
         return columnName + " " + columnType + ",";
     }
 
-    
 
     public static boolean isUseFieldTypeDefault(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.UNKNOWN;

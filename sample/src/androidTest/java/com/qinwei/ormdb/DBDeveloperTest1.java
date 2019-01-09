@@ -32,7 +32,7 @@ public class DBDeveloperTest1 {
 
     @Test
     public void insert() throws Exception {
-        Developer developer = new Developer();
+        final Developer developer = new Developer();
         developer.id = "y10001";
         developer.name = "刘午敬";
 
@@ -48,8 +48,27 @@ public class DBDeveloperTest1 {
         skills.add(skill);
         developer.skills = skills;//存技能信息
 
-        DBManager.getInstance().getDao(Developer.class).newOrUpdate(developer);
-        queryById();
+        long time = System.currentTimeMillis();
+        DBLog.d("----------start insert-------------");
+        DBManager.getInstance().getDao(Developer.class).beginTransaction();
+        for (int i = 0; i < 10000; i++) {
+            developer.id = "" + i;
+            developer.company.id = "" + i;
+            DBManager.getInstance().getDao(Developer.class).newOrUpdate(developer);
+        }
+        DBManager.getInstance().getDao(Developer.class).setTransactionSuccessful();
+        DBManager.getInstance().getDao(Developer.class).endTransaction();
+        DBLog.d("----------end insert------------- 耗时：" + (System.currentTimeMillis() - time));
+//        queryById();
+    }
+
+    @Test
+    public void query() throws Exception {
+        String sql = "select * from dt_developer limit 1000";
+        long time = System.currentTimeMillis();
+        DBLog.d("----------start query-------------");
+        ArrayList<Developer> developers = DBManager.getInstance().getDao(Developer.class).query(sql, null);
+        DBLog.d(developers.size() + " ----------end query------------- 耗时：" + (System.currentTimeMillis() - time));
     }
 
     @Test

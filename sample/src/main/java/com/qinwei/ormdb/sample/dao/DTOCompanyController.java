@@ -15,12 +15,7 @@ public class DTOCompanyController {
     }
 
     public static long newOrUpdate(Company company) {
-        try {
-            return getDao().newOrUpdate(company);
-        } catch (DBException e) {
-            e.printStackTrace();
-        }
-        return -1;
+        return getDao().newOrUpdate(company);
     }
 
     public static long delete(String id) {
@@ -28,11 +23,6 @@ public class DTOCompanyController {
     }
 
     public static Company queryById(String id) {
-        try {
-            return getDao().queryById(id);
-        } catch (DBException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return getDao().queryById(id);
     }
 }

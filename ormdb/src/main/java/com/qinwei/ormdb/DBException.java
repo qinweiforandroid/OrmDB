@@ -5,11 +5,11 @@ package com.qinwei.ormdb;
  * email: qin.wei@mwee.cn
  */
 
-public class DBException extends Exception {
+public class DBException extends RuntimeException {
     private ErrorType type;
 
     public enum ErrorType {
-        IllegalAccess, Instantiation, Security, NoSuchField, UNKNOW
+        IllegalAccess, Instantiation, Security, NoSuchField, IllegalArgument, UNKNOW
     }
 
     private int code;
