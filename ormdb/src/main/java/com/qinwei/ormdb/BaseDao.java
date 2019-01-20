@@ -68,6 +68,7 @@ public final class BaseDao<T> {
 
     /**
      * 设置DTO class类型
+     *
      * @param clazz
      */
     public void setDTOClass(Class<T> clazz) {
@@ -231,7 +232,7 @@ public final class BaseDao<T> {
                 } else if (columnType == Column.ColumnType.INTEGER) {
                     f.set(t, cursor.getInt(columnIndex));
                 } else if (columnType == Column.ColumnType.BIGDECIMAL) {
-                    f.set(t, new BigDecimal(cursor.getDouble(columnIndex)));
+                    f.set(t, new BigDecimal(cursor.getString(columnIndex)));
                 } else if (columnType == Column.ColumnType.VARCHAR) {
                     f.set(t, cursor.getString(columnIndex));
                 } else {
@@ -280,6 +281,15 @@ public final class BaseDao<T> {
     public Cursor rawQuery(String sql, String[] selectionArgs) {
         DBLog.d("rawQuery sql:" + sql);
         return mDatabase.rawQuery(sql, selectionArgs);
+    }
+
+    public String queryString(String sql, String[] selectionArgs) {
+        Cursor cursor = rawQuery(sql, selectionArgs);
+        while (cursor.moveToNext()) {
+            return cursor.getString(0);
+        }
+        cursor.close();
+        return "";
     }
 
     public ArrayList<T> query(String[] columns,

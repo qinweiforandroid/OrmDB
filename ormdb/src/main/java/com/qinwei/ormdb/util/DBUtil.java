@@ -135,7 +135,7 @@ public class DBUtil {
                         columnType = "VARCHAR";
                         break;
                     case BIGDECIMAL:
-                        columnType = "BIGDECIMAL";
+                        columnType = "TEXT";
                         break;
                     default:
                         break;

@@ -28,7 +28,7 @@ public class DBDeveloperTest {
     @Before
     public void setUp() throws Exception {
         appContext = InstrumentationRegistry.getTargetContext();
-        DBManager.init(appContext,new DBHelper(appContext));
+        DBManager.init(appContext, new DBHelper(appContext));
     }
 
     @Test
@@ -36,7 +36,7 @@ public class DBDeveloperTest {
         Developer developer = new Developer();
         developer.id = "10001";
         developer.name = "刘午敬";
-        developer.price = new BigDecimal(20000.01);
+        developer.price = new BigDecimal("20000.01");
 
         Company company = new Company();
         company.id = "10001";
@@ -52,6 +52,14 @@ public class DBDeveloperTest {
         DBManager.getInstance().getDao(Developer.class).newOrUpdate(developer);
         queryById();
     }
+
+    @Test
+    public void queryDouble() throws Exception {
+        String sql = "select price from dt_developer where _id=?";
+        String result = DBManager.getInstance().getDao(Developer.class).queryString(sql, new String[]{"10001"});
+        DBLog.d(result);
+    }
+
 
     @Test
     public void delete() throws Exception {
