@@ -43,6 +43,26 @@ public class DBManager {
         return mInstance;
     }
 
+    public void beginTransaction() {
+        mDatabase.beginTransaction();
+    }
+
+    public void setTransactionSuccessful() {
+        mDatabase.setTransactionSuccessful();
+    }
+
+    public void endTransaction() {
+        mDatabase.endTransaction();
+    }
+
+    public void execSQL(String sql) {
+        mDatabase.execSQL(sql);
+    }
+
+    public void execSQL(String sql, Object[] bindArgs) {
+        mDatabase.execSQL(sql, bindArgs);
+    }
+
     public void release() {
         mDatabase.close();
         mInstance = null;
