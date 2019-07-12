@@ -113,7 +113,7 @@ public class DBUtil {
             Class<?> clazz = field.getType();
             if (clazz == String.class) {
                 columnType = "TEXT";
-            } else if (clazz == int.class || clazz == Integer.class) {
+            } else if (clazz == int.class || clazz == Integer.class || clazz == long.class) {
                 columnType = "INTEGER";
             } else {
                 // FIXME: 2017/2/25 other impl

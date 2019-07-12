@@ -147,6 +147,8 @@ public final class BaseDao<T> {
                 values.put(columnName, f.get(t).toString());
             } else if (f.getType() == int.class || f.getType() == Integer.class) {
                 values.put(columnName, f.getInt(t));
+            } else if (f.getType() == long.class || f.getType() == Long.class) {
+                values.put(columnName, f.getLong(t));
             } else {
                 Column column = mFieldNameColumnInfoMappers.get(f.getName());
                 Column.ColumnType columnType = column.type();
@@ -196,6 +198,8 @@ public final class BaseDao<T> {
                 f.set(t, cursor.getString(columnIndex));
             } else if (f.getType() == int.class || f.getType() == Integer.class) {
                 f.set(t, cursor.getInt(columnIndex));
+            } else if (f.getType() == long.class || f.getType() == Long.class) {
+                f.set(t, cursor.getLong(columnIndex));
             } else {
                 Column column = mFieldNameColumnInfoMappers.get(f.getName());
                 Column.ColumnType columnType = column.type();
