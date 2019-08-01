@@ -144,7 +144,7 @@ public final class BaseDao<T> {
     private <T> void buildContentValues(T t, ContentValues values, Field f, String columnName) throws DBException {
         try {
             if (f.getType() == String.class) {
-                values.put(columnName, f.get(t).toString());
+                values.put(columnName, DBUtil.toString(f.get(t)));
             } else if (f.getType() == int.class || f.getType() == Integer.class) {
                 values.put(columnName, f.getInt(t));
             } else if (f.getType() == long.class || f.getType() == Long.class) {
@@ -218,8 +218,11 @@ public final class BaseDao<T> {
                         BaseDao dao = CacheDaoManager.getInstance().get(mDatabase, f.getType());
                         Object tone = null;
                         String idValue = cursor.getString(columnIndex);
-                        if (idValue == null) return;
-                        if (column.autorefresh()) {//根据外键查询出并转换为object
+                        if (idValue == null) {
+                            return;
+                        }
+                        //根据外键查询出并转换为object
+                        if (column.autorefresh()) {
                             tone = dao.queryById(idValue);
                             DBLog.d("query autoRefresh relate class[" + f.getType().getSimpleName() + "] id[" + idValue + "] info:" + tone);
                         } else {

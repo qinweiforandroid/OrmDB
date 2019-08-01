@@ -179,4 +179,7 @@ public class DBUtil {
     }
 
 
+    public static String toString(Object o) {
+        return o == null ? "" : o.toString();
+    }
 }
