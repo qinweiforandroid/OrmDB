@@ -3,7 +3,8 @@ package com.qinwei.ormdb;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.util.ArrayMap;
+
+import androidx.collection.ArrayMap;
 
 import com.qinwei.ormdb.core.Column;
 import com.qinwei.ormdb.core.Table;
@@ -12,7 +13,6 @@ import com.qinwei.ormdb.util.DBUtil;
 import com.qinwei.ormdb.util.SerializableUtil;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 

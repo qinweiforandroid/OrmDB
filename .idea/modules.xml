@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/OrmDB.iml" filepath="$PROJECT_DIR$/OrmDB.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ormdb/ormdb.iml" filepath="$PROJECT_DIR$/ormdb/ormdb.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ormdb/OrmDB.ormdb.iml" filepath="$PROJECT_DIR$/.idea/modules/ormdb/OrmDB.ormdb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/OrmDB.sample.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/OrmDB.sample.iml" />
     </modules>
   </component>
 </project>

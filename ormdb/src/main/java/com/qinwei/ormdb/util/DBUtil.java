@@ -1,13 +1,20 @@
 package com.qinwei.ormdb.util;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import com.qinwei.ormdb.BaseDao;
+import com.qinwei.ormdb.CacheDaoManager;
+import com.qinwei.ormdb.DBException;
 import com.qinwei.ormdb.core.Column;
 import com.qinwei.ormdb.core.Table;
 import com.qinwei.ormdb.log.DBLog;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 /**
  * Created by qinwei on 2017/2/25.
@@ -126,6 +133,7 @@ public class DBUtil {
                         columnType = "BLOB";
                         break;
                     case TONE:
+                    case BIGDECIMAL:
                         columnType = "TEXT";
                         break;
                     case INTEGER:
@@ -133,9 +141,6 @@ public class DBUtil {
                         break;
                     case VARCHAR:
                         columnType = "VARCHAR";
-                        break;
-                    case BIGDECIMAL:
-                        columnType = "TEXT";
                         break;
                     default:
                         break;
@@ -170,7 +175,7 @@ public class DBUtil {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.TONE;
     }
 
-    public static boolean isUseFieldTypeTmany(Field field) {
+    public static boolean isUseFieldTypeTMany(Field field) {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.TMANY;
     }
 
@@ -178,6 +183,115 @@ public class DBUtil {
         return field.getAnnotation(Column.class).type() == Column.ColumnType.BLOB;
     }
 
+
+    public static void execSQL(SQLiteDatabase mDatabase, String sql) {
+        mDatabase.execSQL(sql);
+    }
+
+    public static void execSQL(SQLiteDatabase mDatabase, String sql, Object[] bindArgs) {
+        mDatabase.execSQL(sql, bindArgs);
+    }
+
+    public static <T> BaseDao<T> getDao(SQLiteDatabase mDatabase, Class<T> clz) {
+        return CacheDaoManager.getInstance().get(mDatabase, clz);
+    }
+
+    public static <T> long newOrUpdate(SQLiteDatabase mDatabase, T t) throws DBException {
+        return getDao(mDatabase, t.getClass()).newOrUpdate(t);
+    }
+
+    public static <T> long delete(SQLiteDatabase mDatabase, Class<T> clazz, String where, String[] whereArgs) {
+        return getDao(mDatabase, clazz).delete(where, whereArgs);
+    }
+
+    public static <T> long delete(SQLiteDatabase mDatabase, Class<T> clazz, String id) {
+        return getDao(mDatabase, clazz).delete(id);
+    }
+
+    public static <T> ArrayList<T> queryAll(SQLiteDatabase mDatabase, Class<T> clazz) throws DBException {
+        return getDao(mDatabase, clazz).queryAll();
+    }
+
+    public static <T> Cursor rawQuery(SQLiteDatabase mDatabase, Class<T> clazz, String sql, String[] selectionArgs) {
+        return getDao(mDatabase, clazz).rawQuery(sql, selectionArgs);
+    }
+
+    public static ArrayList<String> queryArrayString(SQLiteDatabase mDatabase, Class clazz, String sql, String[] selectionArgs) {
+        ArrayList<String> values = new ArrayList<>();
+        Cursor cursor = rawQuery(mDatabase, clazz, sql, selectionArgs);
+        while (cursor.moveToNext()) {
+            values.add(cursor.getString(0));
+        }
+        cursor.close();
+        return values;
+    }
+
+    public static String queryString(SQLiteDatabase mDatabase, Class clazz, String sql, String[] selectionArgs) {
+        ArrayList<String> values = queryArrayString(mDatabase, clazz, sql, selectionArgs);
+        return values.size() > 0 ? values.get(0) : "";
+    }
+
+    public static <T> ArrayList<T> query(SQLiteDatabase mDatabase, String sql, Class<T> clazz) {
+        ArrayList<T> ts = new ArrayList<>();
+        Cursor cursor = mDatabase.rawQuery(sql, null);
+        try {
+            T t;
+            Field f;
+            while (cursor.moveToNext()) {
+                t = clazz.newInstance();
+                Field[] fields = t.getClass().getDeclaredFields();
+                for (int i = 0; i < fields.length; i++) {
+                    f = fields[i];
+                    f.setAccessible(true);
+                    if (f.isAnnotationPresent(Column.class)) {
+                        dto(t, f, cursor);
+                    }
+                }
+                ts.add(t);
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } finally {
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return ts;
+    }
+
+    public static <T> void dto(T t, Field f, Cursor cursor) throws IllegalAccessException, InstantiationException, NoSuchFieldException {
+        Type type = f.getType();
+        String columnName = DBUtil.getColumnName(f);
+        if (type == String.class) {
+            f.set(t, cursor.getString(cursor.getColumnIndex(columnName)));
+        } else if (type == int.class || type == Integer.class) {
+            f.set(t, cursor.getInt(cursor.getColumnIndex(columnName)));
+        } else {
+            Column column = f.getAnnotation(Column.class);
+            Column.ColumnType columnType = column.type();
+            if (columnType == Column.ColumnType.UNKNOWN) {
+                throw new IllegalArgumentException("you must add columnType for special object");
+            }
+            if (columnType == Column.ColumnType.SERIALIZABLE) {
+                byte[] bytes = cursor.getBlob(cursor.getColumnIndex(columnName));
+                if (bytes != null) {
+                    f.set(t, SerializableUtil.toObject(bytes));
+                } else {
+                    f.set(t, null);
+                }
+            } else if (columnType == Column.ColumnType.INTEGER) {
+                f.set(t, cursor.getInt(cursor.getColumnIndex(columnName)));
+            } else if (columnType == Column.ColumnType.BIGDECIMAL) {
+                f.set(t, new BigDecimal(cursor.getDouble(cursor.getColumnIndex(columnName))));
+            } else if (columnType == Column.ColumnType.VARCHAR) {
+                f.set(t, cursor.getString(cursor.getColumnIndex(columnName)));
+            }
+        }
+    }
 
     public static String toString(Object o) {
         return o == null ? "" : o.toString();

@@ -25,11 +25,6 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
-    public SQLiteDatabase getDB() {
-        return getWritableDatabase();
-    }
-
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         DBUtil.createTable(db, Company.class);
