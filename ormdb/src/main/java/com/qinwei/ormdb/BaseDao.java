@@ -270,14 +270,14 @@ public final class BaseDao<T> {
     }
 
     public ArrayList<T> queryAll() throws DBException {
-        ArrayList<T> ts = null;
+        ArrayList<T> ts;
         String sql = "select * from " + mDataTableName;
         Cursor cursor = rawQuery(sql, null);
         ts = query(cursor);
         if (!cursor.isClosed()) {
             cursor.close();
         }
-        return ts == null ? new ArrayList<T>() : ts;
+        return ts;
     }
 
     public ArrayList<T> query(String sql, String[] selectionArgs) throws DBException {
@@ -313,8 +313,8 @@ public final class BaseDao<T> {
     private ArrayList<T> query(Cursor cursor) throws DBException {
         try {
             ArrayList<T> ts = new ArrayList<>();
-            T t = null;
-            Field f = null;
+            T t;
+            Field f;
             while (cursor.moveToNext()) {
                 t = mClazz.newInstance();
                 for (int i = 0; i < mFields.length; i++) {
